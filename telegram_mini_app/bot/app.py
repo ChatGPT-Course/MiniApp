@@ -1,12 +1,13 @@
 import os
 from flask import Flask, request
-from telegram import Bot, Update
+import telegram
+from telegram import Update
 
 app = Flask(__name__)
 
-# Токен бота (добавим в настройки Render)
+# Токен бота
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
-bot = Bot(token=BOT_TOKEN)
+bot = telegram.Bot(token=BOT_TOKEN)
 
 # Главная страница для проверки
 @app.route('/')
