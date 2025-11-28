@@ -1,39 +1,38 @@
 import os
-from flask import Flask, request, jsonify
-import telegram
-from telegram import Update
+from flask import Flask, request
+from telegram import Bot, Update
 
-# Создаем Flask приложение
 app = Flask(__name__)
 
-# Создаем объект бота
+# Токен бота (добавим в настройки Render)
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
-bot = telegram.Bot(token=BOT_TOKEN)
+bot = Bot(token=BOT_TOKEN)
 
-# Эндпоинт для проверки, что бот жив
+# Главная страница для проверки
 @app.route('/')
-def index():
-    return 'Bot is alive!'
+def home():
+    return '🤖 Бот работает! Отправьте /start в Telegram'
 
 # Обработчик вебхука от Telegram
 @app.route('/webhook', methods=['POST'])
 def webhook():
     try:
-        # Получаем обновление от Telegram
         data = request.get_json()
         update = Update.de_json(data, bot)
         
         # Обрабатываем команду /start
         if update.message and update.message.text == '/start':
             chat_id = update.message.chat.id
+            
+            # Отправляем сообщение с кнопкой веб-приложения
             bot.send_message(
                 chat_id=chat_id,
-                text="Добро пожаловать в мое мини-приложение! 🚀",
+                text="🎉 Добро пожаловать! Нажмите кнопку ниже чтобы открыть мини-приложение:",
                 reply_markup={
                     "inline_keyboard": [[
                         {
-                            "text": "🎮 Открыть Мини-Приложение",
-                            "web_app": {"url": "https://your-webapp-url.onrender.com"} # ЗАМЕНИТЕ НА СВОЙ URL!
+                            "text": "🚀 Открыть Мини-Приложение",
+                            "web_app": {"url": "https://your-webapp-url.onrender.com"}
                         }
                     ]]
                 }
@@ -42,18 +41,17 @@ def webhook():
         # Обработка обычных сообщений
         elif update.message and update.message.text:
             chat_id = update.message.chat.id
-            text = update.message.text
+            user_text = update.message.text
             bot.send_message(
                 chat_id=chat_id,
-                text=f"Вы сказали: {text}"
+                text=f"📝 Вы написали: {user_text}\n\nОтправьте /start для открытия меню"
             )
             
         return 'ok'
     
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Ошибка: {e}")
         return 'error', 500
 
-# Запускаем сервер
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
