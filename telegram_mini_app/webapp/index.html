@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мое Мини-Приложение</title>
+    <title>Мой Telegram профиль</title>
     <style>
         * {
             margin: 0;
@@ -11,7 +11,6 @@
             box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -20,7 +19,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .container {
             background: white;
             padding: 30px;
@@ -30,103 +28,185 @@
             max-width: 400px;
             width: 100%;
         }
-
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #667eea;
+            overflow: hidden;
+            border: 3px solid #667eea;
+        }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
         h1 {
             color: #333;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             font-size: 24px;
         }
-
-        p {
-            color: #666;
-            line-height: 1.5;
-            margin-bottom: 20px;
+        .username {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 500;
         }
-
-        .btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 10px 5px;
-            transition: background 0.3s;
-        }
-
-        .btn:hover {
-            background: #5a6fd8;
-        }
-
-        .result {
-            margin-top: 20px;
-            padding: 15px;
+        .info-item {
             background: #f8f9fa;
+            padding: 12px 15px;
             border-radius: 10px;
+            margin: 8px 0;
+            text-align: left;
             border-left: 4px solid #667eea;
         }
-
-        .hidden {
-            display: none;
+        .label {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+        .value {
+            color: #666;
+            word-break: break-all;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        .telegram-badge {
+            background: #0088cc;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        .not-in-telegram {
+            background: #ff4757;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Мое Мини-Приложение</h1>
-        <p>Добро пожаловать! Это простое приложение работает внутри Telegram.</p>
+        <div class="avatar" id="avatar">
+            👤
+        </div>
         
-        <button class="btn" onclick="showMessage()">👋 Нажми меня</button>
-        <button class="btn" onclick="changeColor()">🎨 Сменить цвет</button>
-        <button class="btn" onclick="showTime()">⏰ Показать время</button>
+        <h1 id="userName" class="loading">Загрузка...</h1>
+        <div class="username" id="userUsername"></div>
         
-        <div id="result" class="result hidden">
-            <!-- Здесь будет результат -->
+        <div class="info-item">
+            <div class="label">ID пользователя:</div>
+            <div class="value" id="userId">—</div>
+        </div>
+        
+        <div class="info-item">
+            <div class="label">Язык интерфейса:</div>
+            <div class="value" id="userLanguage">—</div>
+        </div>
+        
+        <div class="info-item">
+            <div class="label">Платформа:</div>
+            <div class="value" id="userPlatform">—</div>
+        </div>
+
+        <div class="info-item">
+            <div class="label">Цвет темы:</div>
+            <div class="value" id="userTheme">—</div>
+        </div>
+        
+        <div class="telegram-badge">
+            📱 Telegram Mini App
         </div>
     </div>
 
     <script>
-        function showMessage() {
-            const messages = [
-                "Отлично! 🎉",
-                "Так держать! 💪",
-                "Отличная работа! 🚀",
-                "Превосходно! 👏",
-                "Молодец! 🌟"
-            ];
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            showResult(randomMessage);
+        function displayUserProfile() {
+            // Проверяем, открыто ли в Telegram Web App
+            if (window.Telegram && Telegram.WebApp) {
+                // Инициализируем Web App
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand(); // Раскрываем на весь экран
+                
+                // Получаем данные пользователя
+                const user = Telegram.WebApp.initDataUnsafe.user;
+                
+                if (user) {
+                    // Отображаем аватар
+                    const avatarElement = document.getElementById('avatar');
+                    if (user.photo_url) {
+                        avatarElement.innerHTML = '<img src="' + user.photo_url + '" alt="Avatar">';
+                    } else {
+                        avatarElement.innerHTML = '👤';
+                        avatarElement.style.fontSize = '40px';
+                    }
+                    
+                    // Отображаем имя
+                    const fullName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+                    document.getElementById('userName').textContent = fullName;
+                    document.getElementById('userName').className = '';
+                    
+                    // Отображаем username
+                    const usernameElement = document.getElementById('userUsername');
+                    if (user.username) {
+                        usernameElement.textContent = '@' + user.username;
+                    } else {
+                        usernameElement.textContent = 'Нет username';
+                        usernameElement.style.color = '#999';
+                    }
+                    
+                    // Отображаем ID
+                    document.getElementById('userId').textContent = user.id;
+                    
+                    // Отображаем язык
+                    document.getElementById('userLanguage').textContent = user.language_code || 'Не указан';
+                    
+                    // Отображаем платформу
+                    document.getElementById('userPlatform').textContent = Telegram.WebApp.platform;
+                    
+                    // Отображаем тему
+                    const theme = Telegram.WebApp.colorScheme;
+                    document.getElementById('userTheme').textContent = theme === 'dark' ? 'Темная' : 'Светлая';
+                    
+                } else {
+                    document.getElementById('userName').textContent = 'Данные не доступны';
+                    document.getElementById('userName').className = '';
+                }
+                
+            } else {
+                // Если открыто не в Telegram
+                const container = document.querySelector('.container');
+                container.innerHTML = `
+                    <div class="not-in-telegram">
+                        ⚠️ Откройте это приложение в Telegram
+                    </div>
+                    <p>Это Mini App для Telegram. Чтобы увидеть ваш профиль, откройте приложение через бота в Telegram.</p>
+                    <div class="telegram-badge">
+                        📱 Telegram Mini App
+                    </div>
+                `;
+            }
         }
 
-        function changeColor() {
-            const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b'];
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            document.body.style.background = `linear-gradient(135deg, ${randomColor} 0%, #${Math.floor(Math.random()*16777215).toString(16)} 100%)`;
-            showResult("Цвет изменен! 🎨");
-        }
+        // Запускаем при загрузке страницы
+        document.addEventListener('DOMContentLoaded', displayUserProfile);
 
-        function showTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('ru-RU');
-            showResult(`Текущее время: ${timeString}`);
-        }
-
-        function showResult(text) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = text;
-            resultDiv.classList.remove('hidden');
-            
-            // Автоматически скрыть через 3 секунды
-            setTimeout(() => {
-                resultDiv.classList.add('hidden');
-            }, 3000);
-        }
-
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("Мини-приложение загружено!");
-        });
+        // Дополнительная информация для отладки
+        console.log('Telegram WebApp:', Telegram?.WebApp);
+        console.log('User data:', Telegram?.WebApp?.initDataUnsafe?.user);
     </script>
 </body>
 </html>
